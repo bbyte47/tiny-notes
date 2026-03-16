@@ -1,0 +1,8 @@
+.next
+node_modules
+*.sqlite
+.env
+test-results
+playwright-report
+.DS_Store
+*.log

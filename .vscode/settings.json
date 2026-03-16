@@ -1,0 +1,13 @@
+{
+  
+  "github.copilot.inlineSuggest.enable": true,
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.chat.editor.temporalContext": true,
+  "codex.includeWorkspaceFiles": true,
+  "codex.maxWorkspaceFiles": 200,
+  "codex.readPriorityFiles": [
+    "AGENTS.md",
+    "PLANS.md",
+    "README.md"
+  ]
+}
