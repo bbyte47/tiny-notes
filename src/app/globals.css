@@ -161,6 +161,26 @@ button {
   margin: 1rem 0 1.25rem;
 }
 
+.notes-search-form {
+  margin-bottom: 1.25rem;
+}
+
+.notes-search-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notes-search-row input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #ffffff;
+}
+
 .notes-empty {
   color: #667085;
 }

@@ -40,6 +40,10 @@ type NoteTarget = {
   ownerUserId: string;
 };
 
+type ListNotesOptions = {
+  titleQuery?: string;
+};
+
 function mapNote(row: NoteRow): NoteRecord {
   return {
     id: row.id,
@@ -183,10 +187,18 @@ export function deleteNote(input: NoteTarget): boolean {
   return !hasNoChanges(result);
 }
 
-export function listNotes(ownerUserId: string): NoteRecord[] {
-  const rows = db
-    .prepare(
-      `
+function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
+export function listNotes(
+  ownerUserId: string,
+  options: ListNotesOptions = {}
+): NoteRecord[] {
+  const titleQuery = options.titleQuery?.trim();
+  const hasTitleQuery = Boolean(titleQuery);
+  const sql = hasTitleQuery
+    ? `
       SELECT
         id,
         owner_user_id,
@@ -199,10 +211,29 @@ export function listNotes(ownerUserId: string): NoteRecord[] {
         updated_at
       FROM notes
       WHERE owner_user_id = ?
-      ORDER BY updated_at DESC
+        AND LOWER(title) LIKE LOWER(?) ESCAPE '\\'
+      ORDER BY updated_at DESC, created_at DESC, id DESC
       `
-    )
-    .all(ownerUserId) as NoteRow[];
+    : `
+      SELECT
+        id,
+        owner_user_id,
+        title,
+        content_json,
+        is_shared,
+        share_token,
+        shared_at,
+        created_at,
+        updated_at
+      FROM notes
+      WHERE owner_user_id = ?
+      ORDER BY updated_at DESC, created_at DESC, id DESC
+      `;
+  const rows = hasTitleQuery
+    ? (db
+        .prepare(sql)
+        .all(ownerUserId, `%${escapeLikePattern(titleQuery!)}%`) as NoteRow[])
+    : (db.prepare(sql).all(ownerUserId) as NoteRow[]);
 
   return rows.map(mapNote);
 }

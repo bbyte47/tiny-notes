@@ -18,15 +18,23 @@ function formatUpdatedAt(isoTimestamp: string): string {
   return updatedAtFormatter.format(date);
 }
 
-export default async function NotesPage() {
+type NotesPageProps = {
+  searchParams: Promise<{
+    q?: string;
+  }>;
+};
+
+export default async function NotesPage({ searchParams }: NotesPageProps) {
   const session = await getSession();
   const userId = session?.user?.id;
+  const { q } = await searchParams;
+  const titleQuery = typeof q === "string" ? q.trim() : "";
 
   if (!userId) {
     redirect("/login");
   }
 
-  const notes = listNotes(userId);
+  const notes = listNotes(userId, { titleQuery });
 
   return (
     <main>
@@ -39,8 +47,28 @@ export default async function NotesPage() {
           + New Note
         </Link>
       </div>
+      <form className="notes-search-form">
+        <label htmlFor="notes-search">Search titles</label>
+        <div className="notes-search-row">
+          <input
+            id="notes-search"
+            name="q"
+            type="search"
+            placeholder="Search notes by title"
+            defaultValue={titleQuery}
+          />
+          <button type="submit">Search</button>
+          {titleQuery ? (
+            <Link href="/notes" className="button-link">
+              Clear
+            </Link>
+          ) : null}
+        </div>
+      </form>
       {notes.length === 0 ? (
-        <p className="notes-empty">No notes yet.</p>
+        <p className="notes-empty">
+          {titleQuery ? "No notes match that search." : "No notes yet."}
+        </p>
       ) : (
         <ul className="notes-cards">
           {notes.map((note) => (
