@@ -26,7 +26,7 @@ const allowedTags = [
   "hr",
 ];
 
-const allowedAttributes: sanitizeHtml.IOptions["allowedAttributes"] = {
+const allowedAttributes: Record<string, string[]> = {
   code: ["class"],
 };
 

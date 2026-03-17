@@ -73,13 +73,15 @@ export async function signInAction(
     };
   }
 
-  let response: Awaited<ReturnType<typeof auth.api.signInEmail>>;
   try {
-    response = await auth.api.signInEmail({
+    const response = await auth.api.signInEmail({
       body: { email, password },
       headers: await headers(),
       returnHeaders: true,
     });
+
+    await applySetCookieHeader(response.headers);
+    redirect("/notes");
   } catch (error) {
     if (
       typeof error === "object" &&
@@ -100,9 +102,6 @@ export async function signInAction(
       email,
     };
   }
-
-  await applySetCookieHeader(response.headers);
-  redirect("/notes");
 }
 
 export async function signOutAction() {

@@ -2,7 +2,7 @@
 
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 const EMPTY_DOCUMENT = {
   type: "doc",
@@ -15,6 +15,8 @@ type NoteEditorFormProps = {
   noteId?: string;
   initialTitle?: string;
   initialContentJson?: string;
+  titleLabel?: string;
+  titleInline?: boolean;
 };
 
 function toInitialDocument(input?: string): Record<string, unknown> {
@@ -40,14 +42,18 @@ export function NoteEditorForm({
   noteId,
   initialTitle = "",
   initialContentJson,
+  titleLabel = "Title",
+  titleInline = false,
 }: NoteEditorFormProps) {
   const initialDocument = useMemo(
     () => toInitialDocument(initialContentJson),
     [initialContentJson]
   );
+  const titleInputId = useId();
   const [contentJson, setContentJson] = useState(() =>
     JSON.stringify(initialDocument)
   );
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -73,12 +79,39 @@ export function NoteEditorForm({
     editor.commands.focus("end");
   }, [editor, noteId]);
 
+  useEffect(() => {
+    if (!titleInline || !noteId) {
+      return;
+    }
+
+    const titleInput = titleInputRef.current;
+    if (!titleInput || initialTitle.trim().length > 0) {
+      return;
+    }
+
+    titleInput.focus();
+  }, [initialTitle, noteId, titleInline]);
+
   return (
     <form action={action}>
       {noteId ? <input type="hidden" name="noteId" value={noteId} /> : null}
 
-      <label htmlFor="title">Title</label>
-      <input id="title" name="title" type="text" defaultValue={initialTitle} required />
+      <label
+        htmlFor={titleInputId}
+        className={titleInline ? "sr-only" : undefined}
+      >
+        {titleLabel}
+      </label>
+      <input
+        ref={titleInputRef}
+        id={titleInputId}
+        name="title"
+        type="text"
+        defaultValue={initialTitle}
+        required
+        className={titleInline ? "note-title-input" : undefined}
+        aria-label={titleInline ? titleLabel : undefined}
+      />
 
       <input type="hidden" name="contentJson" value={contentJson} readOnly />
 

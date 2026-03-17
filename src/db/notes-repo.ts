@@ -54,6 +54,10 @@ function mapNote(row: NoteRow): NoteRecord {
   };
 }
 
+function hasNoChanges(result: { changes?: number }): boolean {
+  return (result.changes ?? 0) === 0;
+}
+
 export function getNoteById(
   noteId: string,
   ownerUserId: string
@@ -164,7 +168,7 @@ export function updateNote(
       input.ownerUserId
     );
 
-  if (result.changes === 0) {
+  if (hasNoChanges(result)) {
     return null;
   }
 
@@ -176,7 +180,7 @@ export function deleteNote(input: NoteTarget): boolean {
     .prepare("DELETE FROM notes WHERE id = ? AND owner_user_id = ?")
     .run(input.noteId, input.ownerUserId);
 
-  return result.changes > 0;
+  return !hasNoChanges(result);
 }
 
 export function listNotes(ownerUserId: string): NoteRecord[] {
@@ -227,7 +231,7 @@ export function enableShare(input: NoteTarget): NoteRecord | null {
       input.ownerUserId
     );
 
-  if (result.changes === 0) {
+  if (hasNoChanges(result)) {
     return null;
   }
 
@@ -251,7 +255,7 @@ export function disableShare(input: NoteTarget): NoteRecord | null {
     )
     .run(timestamp, input.noteId, input.ownerUserId);
 
-  if (result.changes === 0) {
+  if (hasNoChanges(result)) {
     return null;
   }
 

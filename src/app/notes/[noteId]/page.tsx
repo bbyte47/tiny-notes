@@ -35,13 +35,17 @@ export default async function NotePage({ params }: NotePageProps) {
       <p>
         <Link href="/notes">Back to notes</Link>
       </p>
-      <h1>Edit Note</h1>
+      <div className="note-page-header">
+        <p className="note-page-eyebrow">Edit Note</p>
+      </div>
       <NoteEditorForm
         action={updateNoteAction}
         noteId={note.id}
         initialTitle={note.title}
         initialContentJson={note.contentJson}
         submitLabel="Save"
+        titleLabel="Note title"
+        titleInline
       />
       <ShareControls
         noteId={note.id}
